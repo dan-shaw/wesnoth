@@ -42,24 +42,26 @@ jobs:
 
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1.3
-
-# checkout a specific commit to prevent cmake from thinking it can't use the cached dependencies anymore
-# the commit itself is just whatever happens to be the latest commit when a newer version is needed
-      - name: Build vcpkg
-        run: |
-          git clone https://github.com/microsoft/vcpkg.git D:/a/wesnoth/vcpkg
-          cd D:/a/wesnoth/vcpkg
-          git checkout 5b081066f0740e54bdcbe4d0772d85dbb1d8e266
-          D:/a/wesnoth/vcpkg/bootstrap-vcpkg.bat
-
       - name: Setup cmake
         uses: jwlawson/actions-setup-cmake@v1.13
         with:
           cmake-version: '3.20.6'
-
+# checkout a specific commit to prevent cmake from thinking it can't use the cached dependencies anymore
+# the commit itself is just whatever happens to be the latest commit when a newer version is needed
+      - name: Build vcpkg
+        run: |
+          git clone -b graph-debug --single-branch --depth 1 https://github.com/dan-shaw/vcpkg-tool D:/a/wesnoth/vcpkg
+          cd D:/a/wesnoth/vcpkg
+          git switch graph-debug
+          mkdir build
+          cd build
+          cmake ..
+          cmake --build .
+          cp Debug/vcpkg.exe D:/a/wesnoth/vcpkg/vcpkg.exe
+          cd D:/a/wesnoth/vcpkg
       - name: Run cmake
         run: |
-          cmake -DCMAKE_BUILD_TYPE=%CFG% -DENABLE_GAME=true -DENABLE_SERVER=true -DENABLE_CAMPAIGN_SERVER=true -DENABLE_TESTS=true -DENABLE_MYSQL=false -DENABLE_NLS=false -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_INSTALL_OPTIONS="--debug" -DCMAKE_TOOLCHAIN_FILE=D:/a/wesnoth/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_GENERATOR_PLATFORM=x64 -G "Visual Studio 16 2019" .
+          cmake -DCMAKE_BUILD_TYPE=%CFG% -DENABLE_GAME=true -DENABLE_SERVER=true -DENABLE_CAMPAIGN_SERVER=true -DENABLE_TESTS=true -DENABLE_MYSQL=false -DENABLE_NLS=false -DVCPKG_TARGET_TRIPLET=x64-windows -DVCPKG_INSTALL_OPTIONS="--debug --dry-run" -DCMAKE_TOOLCHAIN_FILE=D:/a/wesnoth/vcpkg/scripts/buildsystems/vcpkg.cmake -DCMAKE_GENERATOR_PLATFORM=x64 -G "Visual Studio 16 2019" .
 
 # delete buildtrees directory to free up space after cmake invokes vcpkg to build the dependencies
 # otherwise the job was failing when trying to write a .obj file
