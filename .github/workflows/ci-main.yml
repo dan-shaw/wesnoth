@@ -50,13 +50,15 @@ jobs:
 # the commit itself is just whatever happens to be the latest commit when a newer version is needed
       - name: Build vcpkg
         run: |
-          git clone -b graph-debug --single-branch --depth 1 https://github.com/dan-shaw/vcpkg-tool D:/a/wesnoth/vcpkg
-          cd D:/a/wesnoth/vcpkg
+          git clone https://github.com/microsoft/vcpkg D:/a/wesnoth/vcpkg
+          git clone -b graph-debug --single-branch --depth 1 https://github.com/dan-shaw/vcpkg-tool D:/a/wesnoth/vcpkg-tool
+          cd D:/a/wesnoth/vcpkg-tool
           git switch graph-debug
           mkdir build
           cd build
           cmake ..
           cmake --build .
+          dir
           cp Debug/vcpkg.exe D:/a/wesnoth/vcpkg/vcpkg.exe
           cd D:/a/wesnoth/vcpkg
       - name: Run cmake
